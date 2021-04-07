@@ -1,0 +1,25 @@
+Commands: (commands can be identified by placing a '!' at the front of the text to be sent with '\' as the escape char)
+Commands have a lowercase identifier, which is what the client will use to invoke them, ex. "!exit", "!h"
+Commands also have an 8 character, uppercase identifier which is what will actually be sent in the CMD header, ex. "DSCNCLNT", "HELPMENU"
+
+
+  - exit - DSCNCLNT; disconnects a client from the server gracefully
+    -> returns confirmation and goodbye MSG
+
+  - mute (<client_name> | <client_id>) - MUTECLNT; prevents sending client from recv'ing MSG's from <client_name>
+    -> returns confirmation if <client_name> is found
+    -> returns disconfirmation if <client_name> is not found
+
+  - unmute (<client_name> | <client_id> | "ALL"){, } - UNMTCLNT; unmutes specifed clients
+    -> returns affirmation for found <client_name>'s
+      -> or returns affirmation that all <#_of_muted_clients> were unmuted
+    -> returns disconfirmation for not found <client_names>'s
+
+  - listusers - LISTUSRS; returns list of all users connected to the client
+    -> USERID
+    -> CLIENT_NAME
+    -> MUTE_STATUS
+
+  - (help | h) - HELPMENU; returns list of all possible commands
+
+  - ENDTRANS; SYS-CMD that denotes all MSG's have been sent

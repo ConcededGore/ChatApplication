@@ -1,0 +1,24 @@
+Client Plan:
+*This is going to need to be threaded using PTHREADS, I don't have enough information about this yet to make a solid plan*
+
+TEMPORARY PLAN WHILE DEV'ING SERVER CODE {
+	main loop {
+		Takeuserinput()
+		Recieveservermsgs()
+	}
+
+	Takeuserinput:
+		- Read stdin to get text to be sent
+			-> if '!' is first char, check for CMD validity
+				-> if valid construct header of form: "CMD <CMD_name> <body_size>"
+				-> if valid construct body of form specific to the command (maybe create a digest command function)
+					-> Does c have enums?
+			-> else text is assumed to be a MSG
+				-> for header of form "MSG <msg_size>"
+				-> send body up to *1kb (1024, should def make sure this is 1kb)* at a time, piecing it together with a DigestMSG.h
+
+	Recieveservermsgs():
+		- Recieve MSG and CMD headers and bodies until the <end_transmission> CMD is recieved
+		- Print these MSG's to stdout (and possibly a log file) as they are recieved
+
+}

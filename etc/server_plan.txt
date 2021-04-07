@@ -1,0 +1,23 @@
+Server plan:
+*This can likely be improved via PTHREADs so that MSG's can be received from multiple clients at once, and sent simultaneously*
+
+main loop {
+	checkforconns();
+	checkforrecv();
+	propogaterecv();
+}
+
+Checkforconns:
+	- Check to see if there are any incoming connections, and if they are add them to a linked list of struct Client's
+	- Checks to see if open Clients are indeed still open, and if they are not remove them from the linked list
+
+Checkforrecv:
+	- Checks to see if there are any incoming messeges (with nonblocking sockets!) from list of Clients
+		-> These would be a header of a set size (*512* should work)
+			-> Header would contain either MSG or CMD, and a send-time timestamp
+		-> If there are MSG's, add them to a priority queue based on timestamp
+		-> If there are CMD's, execute the command
+
+PropogateRecv: -----------------------------------------------------------> THIS NEEDS MORE WORK
+	- Send all recieved MSG's to all open clients in the linked list
+		-> Should likely be done with a HEADER : BODY structure

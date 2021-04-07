@@ -1,0 +1,25 @@
+(*lsnr [options] port*)
+<lsnr> = <options>' '{<ip>}' '<port>
+<port> = <nonzero>{<digit>} | <nonzero>{<digit>}<tac><nonzero>{<digit>}
+<options> = {<tac>{<flag>}}' '{<tac><opt>}
+<opt> = <flag>' '<opt_input>
+<opt_input> = <filepath>
+<ip> = <nonzero>{<digit>}'.'<nonzero>{<digit>}'.'<nonzero>{<digit>}'.'<nonzero>{<digit>}
+<filepath> = {'/'}{<file_string>'/'}<file_string>
+<file_string> = <file_char>{<file_char>}'.'{<file_ext>}
+<file_ext> = <alpha>{<alpha>}
+<file_char> = <alphanum> | <file_spec_char>
+
+<file_spec_char> =  '.' | '_' | <tac>
+<flag> = 'l' | 'p' | 'v' | 'o'
+<tac> = '-'
+<alphanum> = <alpha> | <digit>
+<alpha> = <captital_letter> | <lc_letter>
+<digit> = '0' | <nonzero>
+<nonzero> = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+<capital_letter> = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' |
+  'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' |
+  'X' | 'Y' | 'Z'
+<lc_letter> = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' |
+  'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' |
+  'y' | 'z'
