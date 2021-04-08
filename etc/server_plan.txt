@@ -13,7 +13,7 @@ Checkforconns:
 
 Checkforrecv:
 	- Checks to see if there are any incoming messeges (with nonblocking sockets!) from list of Clients
-		-> These would be a header of a set size (*512* should work)
+		-> These would be a header of a set size (*256* should work)
 			-> Header would contain either MSG or CMD, and a send-time timestamp
 		-> If there are MSG's, add them to a priority queue based on timestamp
 		-> If there are CMD's, execute the command
