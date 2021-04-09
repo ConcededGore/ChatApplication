@@ -31,7 +31,7 @@ void listenForConnection(int port) {
 	// first NULL would be struct address of where we want to store info about the accepted client, and then the next null is the size of the struct
 	int clientSocket = accept(serverSocket, NULL, NULL);
 
-	// Initialize handshake protocol
+	// Initiate handshake protocol
 	char *clientName = initHandshake("Server", clientSocket);
 	char *timestamp = getTimestamp();
 	printf("Recieved connection from: %s at %s", clientName, timestamp);

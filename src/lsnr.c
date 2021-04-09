@@ -12,9 +12,10 @@
 #include "option_parser.h"
 #include "server.h"
 #include "client.h"
+#include "linked_list.h"
 
 int main(int argc, char *argv[]) {
-
+	
 	struct Options options;
 
 	initOpts(&options);
@@ -29,6 +30,7 @@ int main(int argc, char *argv[]) {
 void initConn(struct Options options) {
 	if (options.l) {
 		listenForConnection(options.port);
+
 	} else {
 		makeConnection(options.port);
 	}
