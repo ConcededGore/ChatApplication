@@ -39,11 +39,7 @@ void makeConnection(int port) {
 
 char* recvHandshake(const char *clientName, int cltSock) {
 	char data[1024];
-	int i;
-	for (i = 0; i < 1024; i++) {
-		data[i] = 'F';
-	}
-	data[1023] = '\0'; // JUST TO TEST
+
 	recv(cltSock, data, 1024, 0);
 	strtok(data, " ");
 
