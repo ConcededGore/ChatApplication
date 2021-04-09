@@ -16,22 +16,19 @@
 
 int main(int argc, char *argv[]) {
 	
-	struct Options options;
+	struct Options options; // EVENTUALLY THIS SHOULD CONTAIN NAME; IF NONE IS PROVIDED IT SHOULD BE PASSED TO CLIENT IN HANDSHAKE AS Anonymous#%d%d%d%d
 
 	initOpts(&options);
 	parseOpts(argc, argv, &options);
 	printOpts(&options);
 
-	initConn(options);
-
-	return 0;
-}
-
-void initConn(struct Options options) {
 	if (options.l) {
-		listenForConnection(options.port);
-
+		struct NetMember *server = startServer(options.port, "Servalicious");
+		struct NetMember *client = listenForConnection(server);
 	} else {
 		makeConnection(options.port);
 	}
+
+	// NOT FREEING server OR client!!!
+	return 0;
 }

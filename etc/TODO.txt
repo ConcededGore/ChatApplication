@@ -1,12 +1,14 @@
 1:
 - Refactor server code to output a Client struct when listening for a connection, such that said struct can be added to a linked list
-- Implement Server plan
+- Do pthread project to understand how it works
+- Create a script to generate and digest headers and bodies (for both MSG's and CMD's)
 
 2:
-- Multithread Client so that it can listen for MSG's and output text at the same time
 - Multithread Server so it can listen for conns and MSG's, send out MSG's, and execute CMD's at the same time
+- Implement Server plan
+- Multithread Client so that it can listen for MSG's and output text at the same time
+- Implement Client plan
 
 3:
-- Create a script to generate and digest headers and bodies (for both MSG's and CMD's)
 - Refactor option_parser to be more in line with the top down parser I implemented last semester (this will make it more legible and extensible)
 - Create a way interpret and execute CMD's

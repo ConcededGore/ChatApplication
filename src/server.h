@@ -1,12 +1,16 @@
 #ifndef SERVER
-#define server
+#define SERVER
 
-struct Client {
+#include <sys/socket.h>
+
+struct NetMember {
 	int socket;
 	char *name;
+	struct sockaddr_in* addr;
 };
 
-void listenForConnection(int port);
+struct NetMember* startServer(int port, char *name);
+struct NetMember* listenForConnection(struct NetMember *server);
 char* initHandshake(const char *name, int clientSocket);
 char* getTimestamp();
 
