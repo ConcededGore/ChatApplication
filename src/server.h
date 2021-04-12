@@ -1,13 +1,7 @@
 #ifndef SERVER
 #define SERVER
 
-#include <sys/socket.h>
-
-struct NetMember {
-	int socket;
-	char *name;
-	struct sockaddr_in* addr;
-};
+#include "net_member.h"
 
 struct NetMember* startServer(int port, char *name);
 struct NetMember* listenForConnection(struct NetMember *server);

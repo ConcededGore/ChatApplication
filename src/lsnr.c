@@ -13,9 +13,10 @@
 #include "server.h"
 #include "client.h"
 #include "linked_list.h"
+#include "net_member.h"
 
 int main(int argc, char *argv[]) {
-	
+
 	struct Options options; // EVENTUALLY THIS SHOULD CONTAIN NAME; IF NONE IS PROVIDED IT SHOULD BE PASSED TO CLIENT IN HANDSHAKE AS Anonymous#%d%d%d%d
 
 	initOpts(&options);
@@ -25,10 +26,14 @@ int main(int argc, char *argv[]) {
 	if (options.l) {
 		struct NetMember *server = startServer(options.port, "Servalicious");
 		struct NetMember *client = listenForConnection(server);
+		// ADD CLIENT TO linked_list
+		// WHEN THAT'S WORKING TURN THIS INTO A LOOP TO ACCEPT MANY CLIENTS
+		// WHEN THAT'S WORKING MULTITHREAD SERVER TO ACCEPT CLIENTS AND PROPOGATE MSG'S SIMULTANEOUSLY
+		//freeNM(server);
+		//freeNM(client);
 	} else {
 		makeConnection(options.port);
 	}
 
-	// NOT FREEING server OR client!!!
 	return 0;
 }

@@ -10,11 +10,12 @@
 #include <netinet/in.h>
 
 #include "server.h"
+#include "net_member.h"
 
 struct NetMember* startServer(int port, char *name) {
 	int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in *serverAddress = malloc(sizeof(struct sockaddr_in));
-	struct NetMember *retval = malloc(sizeof(struct NetMember));
+	struct NetMember *retval = createNetMember(0, name);
 
 	serverAddress->sin_family = AF_INET;
 	serverAddress->sin_port = htons(port);
@@ -23,7 +24,6 @@ struct NetMember* startServer(int port, char *name) {
 	bind(serverSocket, (struct sockaddr*) serverAddress, sizeof(*serverAddress));
 
 	retval->socket = serverSocket;
-	retval->name = name;
 	retval->addr = serverAddress;
 
 	return retval;
@@ -37,7 +37,7 @@ struct NetMember* listenForConnection(struct NetMember *server) {
 	listen(server->socket, 1);
 
 	// first NULL would be struct address of where we want to store info about the accepted client, and then the next null is the size of the struct
-	int clientSocket = accept(server->socket, NULL /*clientAddr*/, NULL /*sizeof(*clientAddr)*/);
+	int clientSocket = accept(server->socket, NULL /*clientAddr*/, NULL /*sizeof(*clientAddr)*/); // Need to figure out how to store addr info
 
 	// Initiate handshake protocol
 	char *clientName = initHandshake(server->name, clientSocket);
@@ -85,9 +85,8 @@ char* getTimestamp() {
 
 	lt = time(NULL);
 	tmPtr = localtime(&lt);
-	retval = asctime(tmPtr);
+	retval = malloc(strlen(asctime(tmPtr)));
+	strcpy(retval, asctime(tmPtr));
 
 	return retval;
 }
-
-
