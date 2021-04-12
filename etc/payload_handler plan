@@ -1,0 +1,12 @@
+Headers:
+  -> For CMD's construct header of form: "CMD <CMD_name> <body_size>"
+  -> For MSG's construct body of form specific to the command (maybe create a digest command function)
+
+Bodies:
+  -> For CMD's send a '\n' delimited list of CMD parameters (this should never
+     get larger than 1024 chars, use USERID instead of name)
+      -> This means the client must maintain a list of users as well, to get USERID
+  -> For MSG's break text into 1024 chars and send them one at a time until the
+     whole message has been sent (make sure the only \0 char is at the end of the text)
+
+ACTUAL EXECUTION OF THESE CMD'S SHOULD BE DONE IN ITS OWN FILE

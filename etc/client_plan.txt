@@ -12,7 +12,6 @@ TEMPORARY PLAN WHILE DEV'ING SERVER CODE {
 			-> if '!' is first char, check for CMD validity
 				-> if valid construct header of form: "CMD <CMD_name> <body_size>"
 				-> if valid construct body of form specific to the command (maybe create a digest command function)
-					-> Does c have enums?
 			-> else text is assumed to be a MSG
 				-> for header of form "MSG <msg_size>"
 				-> send body up to *1kb (1024, should def make sure this is 1kb)* at a time, piecing it together with a DigestMSG.h

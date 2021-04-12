@@ -1,5 +1,5 @@
 1:
-- Refactor server code to output a Client struct when listening for a connection, such that said struct can be added to a linked list
+- Create payload_hander to create and digest headers/bodies
 - Do pthread project to understand how it works
 - Create a script to generate and digest headers and bodies (for both MSG's and CMD's)
 

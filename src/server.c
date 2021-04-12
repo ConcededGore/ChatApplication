@@ -12,10 +12,10 @@
 #include "server.h"
 #include "net_member.h"
 
-struct NetMember* startServer(int port, char *name) {
+NetMember* startServer(int port, char *name) {
 	int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in *serverAddress = malloc(sizeof(struct sockaddr_in));
-	struct NetMember *retval = createNetMember(0, name);
+	NetMember *retval = createNetMember(0, name);
 
 	serverAddress->sin_family = AF_INET;
 	serverAddress->sin_port = htons(port);
@@ -29,8 +29,8 @@ struct NetMember* startServer(int port, char *name) {
 	return retval;
 }
 
-struct NetMember* listenForConnection(struct NetMember *server) {
-	struct NetMember *retval = malloc(sizeof(struct NetMember));
+NetMember* listenForConnection(struct NetMember *server) {
+	NetMember *retval;
 	//struct sockaddr_in *clientAddr = malloc(sizeof(struct sockaddr_in));
 
 	// listen for connections
@@ -42,8 +42,8 @@ struct NetMember* listenForConnection(struct NetMember *server) {
 	// Initiate handshake protocol
 	char *clientName = initHandshake(server->name, clientSocket);
 
+	retval = createNetMember(1 /*SHOULDNT BE HARDCODED*/, clientName);
 	retval->socket = clientSocket;
-	retval->name = clientName;
 	retval->addr = NULL; //clientAddr;
 
 	// EVERYTHING BELOW SHOULDN'T BE IN THIS FUNCTION
@@ -58,7 +58,7 @@ struct NetMember* listenForConnection(struct NetMember *server) {
 	return retval;
 }
 
-char* initHandshake(const char *name, int cltSock) {
+char* initHandshake(const char *name, int cltSock) { // THIS NEEDS TO BE REWORKED AS IT IS HARDCODED
 	char *data = malloc(1024);
 
 	strcpy(data, "HEAD ");

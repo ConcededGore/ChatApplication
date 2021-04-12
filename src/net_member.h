@@ -8,7 +8,7 @@ typedef struct NetMember {
 	struct sockaddr_in* addr;
 } NetMember;
 
-struct NetMember* createNetMember(int id, char *name);
-void freeNM(struct NetMember* deall);
+NetMember* createNetMember(int id, char *name);
+void freeNM(NetMember* deall);
 
 #endif
