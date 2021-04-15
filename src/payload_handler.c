@@ -33,28 +33,52 @@ char* CMDtoa(CMD cmd) {
 	}
 }
 
-// UNIMPLEMENTED
-int getCMDBodySize(CMD cmd) {
-	return 0;
+int getCMDBodySize(CMDData *data) {
+	int retval = 0;
+	int i;
+
+	for (i = 0; i < data->argc; i++) {
+		retval += (int)strlen(data->argv[i]) + 1; // +'\n' or + '\0'
+	}
+
+	return retval;
 }
 
-char* genCMDHeader(CMD cmd) {
+char* genCMDHeader(CMDData *data) {
 
 	char *retval = malloc(20 * sizeof(char)); // "CMDIDENT 2147483647\0" is the longest possible header, 20 chars
-	strcpy(retval, "CMD ");
-	strcat(retval, CMDtoa(cmd));
+	strcat(retval, CMDtoa(data->cmd)); // CMDIDENT
 	strcat(retval, " ");
 	char intStr[10];
-	sprintf(intStr, "%d", getCMDBodySize(cmd));
+	sprintf(intStr, "%d", getCMDBodySize(data)); // BODYSIZE (int)
 	strcat(retval, intStr);
 
 	return retval;
 }
 
 // BE CAREFUL THAT FOR MSG's THE ACTUAL TEXT IS THE VERY LAST ARG SO IT MAY CONTAIN \n WITHOUT ISSUE (or escape chars cuz I'm lazy)
-char* genCMDBody(CMDData data) {
-	char *retval = malloc(25 * sizeof(char));
-	strcpy(retval, "UNIMPLEMENTED\n");
+char* genCMDBody(CMDData *data) {
+	int bodySize = getCMDBodySize(data);
+	if (bodySize < 1) {
+		printf("ERROR: bodySize in genCMDBody < 1!\n");
+		return NULL;
+	}
+
+	char *retval = malloc(bodySize * sizeof(char));
+	retval[0] = '\0';
+	int i;
+	
+	for (i = 0; i < data->argc; i++) {
+		strcat(retval, data->argv[i]);
+		strcat(retval, "\n");
+	}
+
+	if (strlen(retval) != bodySize) { // +1 for the '\0'
+		printf("ERROR: genCMDBody has generated a retval of size %d, but expected to generate one of size %d\n", (int)strlen(retval), bodySize);
+		printf("Body: %s\n", retval);
+		return NULL;
+	}
+
 	return retval;
 }
 

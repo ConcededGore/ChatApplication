@@ -11,6 +11,7 @@
 
 #include "server.h"
 #include "net_member.h"
+#include "payload_handler.h"
 
 NetMember* startServer(int port, char *name) {
 	int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -58,21 +59,22 @@ NetMember* listenForConnection(struct NetMember *server) {
 	return retval;
 }
 
-char* initHandshake(const char *name, int cltSock) { // THIS NEEDS TO BE REWORKED AS IT IS HARDCODED
-	char *data = malloc(1024);
+char* initHandshake(const char *name, int cltSock) { 
+	// THIS NEEDS TO BE REWORKED AS IT IS HARDCODED
+	char **args = malloc(sizeof(char*));
+	args[0] = malloc(((int)strlen("Servalicious") + 1) * sizeof(char));
+	strcpy(args[0], "Servalicious");
+	CMDData *data = genCMDData(HSHKINIT, 1, args);
 
-	strcpy(data, "HEAD ");
-	strcat(data, name);
-	strcat(data, " ");
-	send(cltSock, data, strlen(data), 0);
+	char *header = genCMDHeader(data);
+	send(cltSock, header, 20, 0);
 
-	recv(cltSock, data, 1024, 0);
-	char clientName[1024];
-	strtok(data, " ");
-	strcpy(clientName, strtok(NULL, " "));
+	char *body = genCMDBody(data);
+	// ADD bodySize TO CMDData
+	send(cltSock, body, getCMDBodySize(data), 0);
 
-	char *retval = malloc(strlen(clientName) * sizeof(char));
-	strcpy(retval, clientName);
+	char *retval = malloc(256 * sizeof(char));
+	strcpy(retval, "TEMP");
 
 	free(data);
 	return retval;

@@ -22,10 +22,10 @@ typedef struct CMDData {
 
 char* CMDtoa(CMD cmd);
 
-char* genCMDHeader(CMD cmd);
-char* genCMDBody(CMDData data);
+char* genCMDHeader(CMDData *data);
+char* genCMDBody(CMDData *data);
 
-int getCMDBodySize(CMD cmd);
+int getCMDBodySize(CMDData *data);
 
 CMDData* genCMDData(CMD cmd, int argc, char **argv);
 void freeCMDData(CMDData *data);
