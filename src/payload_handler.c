@@ -33,35 +33,47 @@ char* CMDtoa(CMD cmd) {
 	}
 }
 
-char* genMSGHeader(char *MSG) {
-	if (strlen(MSG) > 2147483647) { // \0 is not considered in strlen
-		printf("ERROR: MSG LENGTH EXCEEDS MAXIMUM 32 BIT INTEGER VALUE!");
-		return NULL;
-	}
-
-	char *retval = malloc(24 * sizeof(char)); // "CMD CMDIDENT 2147483647\0" is the longest possible header, 24 chars
-	strcpy(retval, "MSG ");
-	char intStr[10];
-	sprintf(intStr, "%d", (int)strlen(MSG));
-	strcat(retval, intStr);
-
-	return retval;
-}
-
 // UNIMPLEMENTED
-int getCMDBodySize() {
+int getCMDBodySize(CMD cmd) {
 	return 0;
 }
 
 char* genCMDHeader(CMD cmd) {
 
-	char *retval = malloc(24 * sizeof(char)); // DITTO ABOVE
+	char *retval = malloc(20 * sizeof(char)); // "CMDIDENT 2147483647\0" is the longest possible header, 20 chars
 	strcpy(retval, "CMD ");
 	strcat(retval, CMDtoa(cmd));
 	strcat(retval, " ");
 	char intStr[10];
-	sprintf(intStr, "%d", getCMDBodySize());
+	sprintf(intStr, "%d", getCMDBodySize(cmd));
 	strcat(retval, intStr);
 
 	return retval;
+}
+
+// BE CAREFUL THAT FOR MSG's THE ACTUAL TEXT IS THE VERY LAST ARG SO IT MAY CONTAIN \n WITHOUT ISSUE (or escape chars cuz I'm lazy)
+char* genCMDBody(CMDData data) {
+	char *retval = malloc(25 * sizeof(char));
+	strcpy(retval, "UNIMPLEMENTED\n");
+	return retval;
+}
+
+// ADD FUNC'S TO AUTOGEN ARGC AND ARGV (this would also allow the data to be freed automatically!!!)
+CMDData* genCMDData(CMD cmd, int argc, char **argv) {
+
+	CMDData *retval = malloc(sizeof(CMDData));
+
+	retval->cmd = cmd;
+	retval->argc = argc;
+	retval->argv = argv;
+
+	return retval;
+}
+
+void freeCMDData(CMDData *data) {
+	int i;
+	for (i = 0; i < data->argc; i++) {
+		free(data->argv[i]);
+	}
+	free(data);
 }

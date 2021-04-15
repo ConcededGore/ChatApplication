@@ -24,10 +24,6 @@ int main(int argc, char *argv[]) {
 	parseOpts(argc, argv, &options);
 	printOpts(&options);
 
-	char test[] = "This is another test, a reaaaaaaally long test test";
-	printf("%s\n", genMSGHeader((char*)&test));
-	printf("%s\n", genCMDHeader(DSCNCLNT));
-
 	if (options.l) {
 		NetMember *server = startServer(options.port, "Servalicious");
 		NetMember *client = listenForConnection(server);

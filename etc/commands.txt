@@ -2,6 +2,12 @@ Commands: (commands can be identified by placing a '!' at the front of the text 
 Commands have a lowercase identifier, which is what the client will use to invoke them, ex. "!exit", "!h"
 Commands also have an 8 character, uppercase identifier which is what will actually be sent in the CMD header, ex. "DSCNCLNT", "HELPMENU"
 
+User CMD's - Only used by the end user
+  - SENDMESG; default when no ! character is found at the beginning of the entered text
+    -> quite literally meant to send plain text
+      (arg0: timestamp)
+      (arg1: MSG)
+
 Joint CMD's - Require action from user and server
   - exit - DSCNCLNT; disconnects a client from the server gracefully
     -> returns confirmation and goodbye MSG
@@ -19,6 +25,13 @@ Sys CMD's - Used in the background, not to be invoked by the user EVER!
   - UPDTUSRS; Tells the client to update its list of clients connected to the room
     -> This should be called to ensure server and client list is synchronized
     -> Client side only needs to store Name, ID, and MUTE_STATUS
+  - HSHKINIT; Initializes the handshake protocol
+    -> Server to Client
+      (arg0: server_name)
+  - HSHKRECV; Response for the handshake protocol
+    -> Client to server
+      (arg0: client_name)
+      (arg1: timestamp)
 
 Local CMD's - Invoked by the user, but does not require server action
   - listusers - returns list of all users connected to the room

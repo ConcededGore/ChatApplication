@@ -2,8 +2,10 @@
 #define PAYLOADHANDLER
 
 typedef enum CMD {
+	// USER CMD's
+	SENDMESG, // Used for sending plain text
 	// JOINT CMD's
-	DSCNCLNT, // Disconnect client
+	DSCNCLNT, // Signals that a client is disconnecting
 	MUTECLNT, // Mute a client
 	UNMTCLNT, // Unmute a client
 	// SYS CMD's
@@ -12,8 +14,20 @@ typedef enum CMD {
 	HSHKRECV // Tells server handshake is recieved and furthers protocol
 } CMD;
 
+typedef struct CMDData {
+	CMD cmd;
+	int argc;
+	char **argv;
+} CMDData;
+
 char* CMDtoa(CMD cmd);
-char* genMSGHeader(char *MSG);
+
 char* genCMDHeader(CMD cmd);
+char* genCMDBody(CMDData data);
+
+int getCMDBodySize(CMD cmd);
+
+CMDData* genCMDData(CMD cmd, int argc, char **argv);
+void freeCMDData(CMDData *data);
 
 #endif
