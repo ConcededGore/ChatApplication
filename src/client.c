@@ -28,7 +28,7 @@ void makeConnection(int port) {
 	}
 	
 	char *serverName = recvHandshake("Client", clientSocket);
-	printf("Connected to: %s", serverName);
+	printf("Connected to: %s\n", serverName);
 
 	// close socket
 	close(clientSocket);
@@ -41,17 +41,19 @@ char* recvHandshake(const char *clientName, int cltSock) {
 	char header[20];
 
 	recv(cltSock, header, 20, 0);
-	printf("GOT HEADER:\n%s\n", header);
+
 	int bodySize = 0;
-	strtok(header, " ");
 	// THIS IS DANGEROUS WHEN MULTITHREADING!!!!!
+	strtok(header, " ");
 	bodySize = atoi(strtok(NULL, "\0"));
 	printf("BODY SIZE: %d\n", bodySize);
 
 	char serverName[bodySize];
 	recv(cltSock, serverName, bodySize, 0);
+	serverName[bodySize - 1] = '\0';
 
-	char *retval = malloc(strlen(serverName) * sizeof(char));
+	char *retval = malloc(strlen(serverName) + 1 * sizeof(char)); // +1 is for '\0'
+	retval[bodySize] = '\0';
 	strcpy(retval, serverName);
 
 	

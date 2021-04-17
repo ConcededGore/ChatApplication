@@ -16,18 +16,33 @@ typedef enum CMD {
 
 typedef struct CMDData {
 	CMD cmd;
+	int bodySize;
 	int argc;
 	char **argv;
 } CMDData;
 
+typedef struct Payload {
+	char *header;
+	char *body;
+	int bodySize;
+} Payload;
+
 char* CMDtoa(CMD cmd);
+
+Payload* genHSHKINIT(const char *srvName);
 
 char* genCMDHeader(CMDData *data);
 char* genCMDBody(CMDData *data);
+char* getTimestamp();
+
+CMDData* genCMDData(CMD cmd, int argc, char **argv);
+CMDData* digestHeader(char *str); // THIS WILL FREE THE GIVEN STR AUTOMATICALLY
+CMDData* digestBody(CMDData *data); // THIS WILL FREE PASSED DATA AUTOMATICALLY
 
 int getCMDBodySize(CMDData *data);
 
 CMDData* genCMDData(CMD cmd, int argc, char **argv);
 void freeCMDData(CMDData *data);
+void freePayload(Payload *payload);
 
 #endif

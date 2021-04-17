@@ -35,7 +35,7 @@ NetMember* listenForConnection(struct NetMember *server) {
 	//struct sockaddr_in *clientAddr = malloc(sizeof(struct sockaddr_in));
 
 	// listen for connections
-	listen(server->socket, 1);
+	listen(server->socket, 1); // 1 means there can only be one connection enqueued
 
 	// first NULL would be struct address of where we want to store info about the accepted client, and then the next null is the size of the struct
 	int clientSocket = accept(server->socket, NULL /*clientAddr*/, NULL /*sizeof(*clientAddr)*/); // Need to figure out how to store addr info
@@ -48,47 +48,25 @@ NetMember* listenForConnection(struct NetMember *server) {
 	retval->addr = NULL; //clientAddr;
 
 	// EVERYTHING BELOW SHOULDN'T BE IN THIS FUNCTION
-	char *timestamp = getTimestamp();
-	printf("Recieved connection from: %s at %s", clientName, timestamp);
+	printf("Recieved connection from: %s", clientName);
 	// close socket
 	close(server->socket);
 	// Free pointers
 	free(clientName);
-	free(timestamp);
 
 	return retval;
 }
 
 char* initHandshake(const char *name, int cltSock) { 
-	// THIS NEEDS TO BE REWORKED AS IT IS HARDCODED
-	char **args = malloc(sizeof(char*));
-	args[0] = malloc(((int)strlen("Servalicious") + 1) * sizeof(char));
-	strcpy(args[0], "Servalicious");
-	CMDData *data = genCMDData(HSHKINIT, 1, args);
 
-	char *header = genCMDHeader(data);
-	send(cltSock, header, 20, 0);
+	Payload *handshakeSend = genHSHKINIT("Servalicious");
 
-	char *body = genCMDBody(data);
-	// ADD bodySize TO CMDData
-	send(cltSock, body, getCMDBodySize(data), 0);
+	send(cltSock, handshakeSend->header, 20, 0);
+	send(cltSock, handshakeSend->body, handshakeSend->bodySize, 0);
+	freePayload(handshakeSend);
 
 	char *retval = malloc(256 * sizeof(char));
 	strcpy(retval, "TEMP");
-
-	free(data);
-	return retval;
-}
-
-char* getTimestamp() {
-	struct tm *tmPtr;
-	time_t lt;
-	char *retval;
-
-	lt = time(NULL);
-	tmPtr = localtime(&lt);
-	retval = malloc(strlen(asctime(tmPtr)));
-	strcpy(retval, asctime(tmPtr));
 
 	return retval;
 }
