@@ -1,7 +1,9 @@
 #ifndef CLIENT
 #define CLIENT
 
+#include "payload_handler.h"
+
 void makeConnection(int port);
-char* recvHandshake(const char *clientName, int cltSock);
+CMDData* recvHandshake(const char *clientName, int cltSock);
 
 #endif

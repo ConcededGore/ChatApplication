@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 
 #include "client.h"
+#include "payload_handler.h"
 
 void makeConnection(int port) {
 
@@ -27,35 +28,31 @@ void makeConnection(int port) {
 		return;
 	}
 	
-	char *serverName = recvHandshake("Client", clientSocket);
-	printf("Connected to: %s\n", serverName);
+	CMDData *hshkData = recvHandshake("Client", clientSocket);
+	printf("Connected to: %s at %s\n", hshkData->argv[0], hshkData->argv[1]);
 
 	// close socket
 	close(clientSocket);
 
 	// Free pointers
-	free(serverName);
+	freeCMDData(hshkData);
 }
 
-char* recvHandshake(const char *clientName, int cltSock) {
+CMDData* recvHandshake(const char *clientName, int cltSock) {
 	char header[20];
 
 	recv(cltSock, header, 20, 0);
 
 	int bodySize = 0;
-	// THIS IS DANGEROUS WHEN MULTITHREADING!!!!!
-	strtok(header, " ");
-	bodySize = atoi(strtok(NULL, "\0"));
-	printf("BODY SIZE: %d\n", bodySize);
+		
+	CMDData *retval = digestHeader(header);
 
-	char serverName[bodySize];
-	recv(cltSock, serverName, bodySize, 0);
-	serverName[bodySize - 1] = '\0';
+	bodySize = retval->bodySize;
 
-	char *retval = malloc(strlen(serverName) + 1 * sizeof(char)); // +1 is for '\0'
-	retval[bodySize] = '\0';
-	strcpy(retval, serverName);
+	char body[bodySize];
+	recv(cltSock, body, bodySize, 0);
 
+	digestBody(body, retval);
 	
 	return retval;
 }

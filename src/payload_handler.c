@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
 
 #include "payload_handler.h"
 
 char* CMDtoa(CMD cmd) {
 	char *retval = malloc(9 * sizeof(char));
+	retval[0] = '\0';
 	switch(cmd) {
 		// JOINT CMD's
 		case DSCNCLNT:
@@ -29,9 +31,29 @@ char* CMDtoa(CMD cmd) {
 			strcpy(retval, "HSHKRECV");
 			return retval;
 		default:
-			printf("ERROR: CMDtoa IS DEFAULTING FROM cmd = %d", cmd);
+			printf("ERROR: CMDtoa IS DEFAULTING FROM cmd = %d\n", cmd); // THIS IS FOR IF I ADD NEW CMD's AND FORGET TO UPDATE THIS FUNC
 			return NULL;
 	}
+}
+
+CMD atoCMD(char *str) {
+
+	if (!strcmp(str, "DSCNCLNT")) {
+		return DSCNCLNT;
+	} else if (!strcmp(str, "MUTECLNT")) {
+		return MUTECLNT;
+	} else if (!strcmp(str, "UNMTCLNT")) {
+		return UNMTCLNT;
+	} else if (!strcmp(str, "UPDTUSRS")) {
+		return UPDTUSRS;
+	} else if (!strcmp(str, "HSHKINIT")) {
+		return HSHKINIT;
+	} else if (!strcmp(str, "HSHKRECV")) {
+		return HSHKRECV;
+	}
+
+	printf("atoCMD is defaulting with str: %s\nReturning 0 (BADCMD)", str);
+	return BADCMD;
 }
 
 int getCMDBodySize(CMDData *data) {
@@ -74,13 +96,138 @@ Payload* genHSHKINIT(const char *srvName) {
 char* genCMDHeader(CMDData *data) {
 
 	char *retval = malloc(20 * sizeof(char)); // "CMDIDENT 2147483647\0" is the longest possible header, 20 chars
-	strcat(retval, CMDtoa(data->cmd)); // CMDIDENT
+	strcpy(retval, CMDtoa(data->cmd)); // CMDIDENT
 	strcat(retval, " ");
 	char intStr[10];
 	sprintf(intStr, "%d", data->bodySize); // BODYSIZE (int)
 	strcat(retval, intStr);
 
 	return retval;
+}
+
+CMDData* digestHeader(char *str) {
+	char *ptr = str;
+	char *numStart;
+
+	char cmdStr[9];
+	cmdStr[8] = '\0';
+
+	char curr = ptr[0];
+	
+	int count = 0;
+	int digFlag = 0;
+
+	CMD cmd;
+	
+	CMDData *retval = malloc(sizeof(CMDData));
+
+	while (curr != '\0') {
+		if (count == 8) {
+			cmd = atoCMD(cmdStr);
+			count = 0;
+			break;
+		}
+		cmdStr[count] = curr;
+		ptr++;
+		count++;
+		curr = ptr[0];
+	}
+
+	if (cmd == BADCMD) {
+		printf("digestHeader got a BADCMD cmd\n");
+		freeCMDData(retval);
+		return NULL;
+	}
+
+	retval->cmd = cmd;
+
+	if (curr != ' ') {
+		printf("digesterHeader did not find a space where it was expected\n");
+		freeCMDData(retval);
+		return NULL;
+	}
+	ptr++;
+
+	numStart = ptr;
+	curr = ptr[0];
+	while(curr != '\0') {
+		if (curr < 48 || curr > 57) {
+			digFlag = 1;
+			break;
+		}
+		ptr++;
+		curr = ptr[0];
+	}
+
+	if (digFlag) {
+		printf("digestHeader found latter half of header to be non-digits\n");
+		freeCMDData(retval);
+		return NULL;
+	}
+
+	retval->bodySize = atoi(numStart);
+
+	retval->argc = getNumArgs(retval->cmd);
+	retval->argv = malloc(retval->argc * sizeof(char *));
+
+	return retval;
+}
+
+CMDData* digestBody(char *str, CMDData *header) {
+	char *argStart = str;
+	char *ptr = str;
+
+	char curr = argStart[0];
+
+	int argCount = 0;
+
+	switch(header->cmd) {
+		case SENDMESG: // THIS IS BECAUSE SEND MESSEGE MAY HAVE NEWLINES IN THE MSG BODY, AND MUST BE TREATED DIFFERENTLY
+			printf("SENDMSG is currently unimplemented!!!\n");
+			break;
+		default:
+			while(curr != '\0') {
+				if (curr == '\n') { // Should probably write a func to validate that number of \n's is as expected by argc
+					ptr[0] = '\0';
+
+					ptr++;
+					curr = ptr[0];
+					if (curr == '\0') { // Since there is always a trailing '\n'
+						break;
+					}
+
+					header->argv[argCount] = malloc((strlen(argStart) + 1) * sizeof(char));
+					strcpy(header->argv[argCount], argStart);
+					
+					argCount++;
+					argStart = ptr;
+
+					continue;
+				}
+				ptr++;
+				curr = ptr[0];
+			}
+	}
+
+	return header;
+
+}
+
+int getNumArgs(CMD cmd) {
+	switch(cmd) {
+		case HSHKINIT:
+		case HSHKRECV:
+		case SENDMESG:
+		case MUTECLNT:
+		case UNMTCLNT:
+			return 2;
+		case DSCNCLNT:
+		case UPDTUSRS:
+			return 1;
+		default:
+			printf("getNumArgs is defaulting with CMD: %d\n", cmd);
+			return 0;
+	}
 }
 
 // BE CAREFUL THAT FOR MSG's THE ACTUAL TEXT IS THE VERY LAST ARG SO IT MAY CONTAIN \n WITHOUT ISSUE (or escape chars cuz I'm lazy)
@@ -121,6 +268,8 @@ CMDData* genCMDData(CMD cmd, int argc, char **argv) {
 
 	return retval;
 }
+
+// HELPER FUNCTIONS
 
 void freeCMDData(CMDData *data) {
 	int i;

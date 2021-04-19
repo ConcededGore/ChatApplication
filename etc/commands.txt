@@ -11,29 +11,36 @@ User CMD's - Only used by the end user
 Joint CMD's - Require action from user and server
   - exit - DSCNCLNT; disconnects a client from the server gracefully
     -> returns confirmation and goodbye MSG
+      (arg0: userid) # Id of user sending the disconnect request
 
   - mute (<client_name> | <client_id>) - MUTECLNT; prevents sending client from recv'ing MSG's from <client_name>
     -> returns confirmation if <client_name> is found
     -> returns disconfirmation if <client_name> is not found
+      (arg0: userid) # Id of user sending the mute request
+      (arg1: targetid) # Id of user to be muted
 
   - unmute (<client_name> | <client_id> | "ALL"){, } - UNMTCLNT; unmutes specifed clients
     -> returns affirmation for found <client_name>'s
       -> or returns affirmation that all <#_of_muted_clients> were unmuted
     -> returns disconfirmation for not found <client_names>'s
+      (arg0: userid) # Id of user sending the unmute request
+      (arg1: targetid) # Id of user to be unmuted
 
 Sys CMD's - Used in the background, not to be invoked by the user EVER!
   - UPDTUSRS; Tells the client to update its list of clients connected to the room
     -> This should be called to ensure server and client list is synchronized
     -> Client side only needs to store Name, ID, and MUTE_STATUS
+      (arg0: userlist) # SHOULD BE IN FORMAT userid0:username0:mutestatus0;uid1,unm2:ms2;etc
   - HSHKINIT; Initializes the handshake protocol
     -> Server to Client
       (arg0: server_name)
+      (arg1: timestamp)
   - HSHKRECV; Response for the handshake protocol
     -> Client to server
       (arg0: client_name)
       (arg1: timestamp)
 
-Local CMD's - Invoked by the user, but does not require server action
+Local CMD's - Invoked by the user, but does not require server action (SHOULD NEVER BE SENT OVER THE WIRE)
   - listusers - returns list of all users connected to the room
     -> USERID
     -> CLIENT_NAME

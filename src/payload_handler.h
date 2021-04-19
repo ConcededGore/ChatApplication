@@ -2,6 +2,7 @@
 #define PAYLOADHANDLER
 
 typedef enum CMD {
+	BADCMD, // SHOULD NEVER EVER BE USED INTENTIONALLY, MERELY FOR RETURNING AN ERROR (currently just for atoCMD)
 	// USER CMD's
 	SENDMESG, // Used for sending plain text
 	// JOINT CMD's
@@ -28,6 +29,7 @@ typedef struct Payload {
 } Payload;
 
 char* CMDtoa(CMD cmd);
+CMD atoCMD(char *str);
 
 Payload* genHSHKINIT(const char *srvName);
 
@@ -36,10 +38,11 @@ char* genCMDBody(CMDData *data);
 char* getTimestamp();
 
 CMDData* genCMDData(CMD cmd, int argc, char **argv);
-CMDData* digestHeader(char *str); // THIS WILL FREE THE GIVEN STR AUTOMATICALLY
-CMDData* digestBody(CMDData *data); // THIS WILL FREE PASSED DATA AUTOMATICALLY
+CMDData* digestHeader(char *str); // Returns CMDData with bodySize and cmd set
+CMDData* digestBody(char *str, CMDData *header); // Returns CMDData, with all set
 
 int getCMDBodySize(CMDData *data);
+int getNumArgs(CMD cmd);
 
 CMDData* genCMDData(CMD cmd, int argc, char **argv);
 void freeCMDData(CMDData *data);
