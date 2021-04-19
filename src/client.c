@@ -38,21 +38,26 @@ void makeConnection(int port) {
 	freeCMDData(hshkData);
 }
 
-CMDData* recvHandshake(const char *clientName, int cltSock) {
+CMDData* recvHandshake(const char *clientName, int clntSock) {
+	// Getting initial handshake
 	char header[20];
-
-	recv(cltSock, header, 20, 0);
-
 	int bodySize = 0;
-		
-	CMDData *retval = digestHeader(header);
+	CMDData *retval;
 
+	recv(clntSock, header, 20, 0);	
+	retval = digestHeader(header);
 	bodySize = retval->bodySize;
-
 	char body[bodySize];
-	recv(cltSock, body, bodySize, 0);
+	recv(clntSock, body, bodySize, 0);
+	digestBody(body, retval); // This returns the pointer to body, but since its a pointer also alters it directly
 
-	digestBody(body, retval);
+	// Sending response to handshake
+	Payload *hshkrecv = genHSHKRECV(clientName);
+	send(clntSock, hshkrecv->header, 20, 0);
+	send(clntSock, hshkrecv->body, hshkrecv->bodySize, 0);
+
+	// Free pointers
+	freePayload(hshkrecv);
 	
 	return retval;
 }

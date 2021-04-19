@@ -32,12 +32,14 @@ char* CMDtoa(CMD cmd);
 CMD atoCMD(char *str);
 
 Payload* genHSHKINIT(const char *srvName);
+Payload* genHSHKRECV(const char *clntName);
 
 char* genCMDHeader(CMDData *data);
 char* genCMDBody(CMDData *data);
 char* getTimestamp();
 
 CMDData* genCMDData(CMD cmd, int argc, char **argv);
+// str is the raw header/body recieved from the socket || SHOULD RENAME THIS!!!
 CMDData* digestHeader(char *str); // Returns CMDData with bodySize and cmd set
 CMDData* digestBody(char *str, CMDData *header); // Returns CMDData, with all set
 

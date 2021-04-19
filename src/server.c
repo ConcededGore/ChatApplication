@@ -41,32 +41,41 @@ NetMember* listenForConnection(struct NetMember *server) {
 	int clientSocket = accept(server->socket, NULL /*clientAddr*/, NULL /*sizeof(*clientAddr)*/); // Need to figure out how to store addr info
 
 	// Initiate handshake protocol
-	char *clientName = initHandshake(server->name, clientSocket);
+	CMDData *hshk = initHandshake(server->name, clientSocket);
 
-	retval = createNetMember(1 /*SHOULDNT BE HARDCODED*/, clientName);
+	retval = createNetMember(1 /*SHOULDNT BE HARDCODED*/, hshk->argv[0]);
 	retval->socket = clientSocket;
 	retval->addr = NULL; //clientAddr;
 
 	// EVERYTHING BELOW SHOULDN'T BE IN THIS FUNCTION
-	printf("Recieved connection from: %s", clientName);
+	printf("%s:\t%s connected!\n", hshk->argv[1], hshk->argv[0]);
 	// close socket
 	close(server->socket);
 	// Free pointers
-	free(clientName);
+	freeCMDData(hshk);
 
 	return retval;
 }
 
-char* initHandshake(const char *name, int cltSock) { 
+CMDData* initHandshake(const char *name, int clntSock) { 
 
+	// Sending initial handshake
 	Payload *handshakeSend = genHSHKINIT("Servalicious");
-
-	send(cltSock, handshakeSend->header, 20, 0);
-	send(cltSock, handshakeSend->body, handshakeSend->bodySize, 0);
+	send(clntSock, handshakeSend->header, 20, 0);
+	send(clntSock, handshakeSend->body, handshakeSend->bodySize, 0);
 	freePayload(handshakeSend);
 
-	char *retval = malloc(256 * sizeof(char));
-	strcpy(retval, "TEMP");
+	// Recieving handshake response
+	char header[20];
+	int bodySize = 0;
+	CMDData *retval;
+
+	recv(clntSock, header, 20, 0);
+	retval = digestHeader(header);
+	bodySize = retval->bodySize;
+	char body[bodySize];
+	recv(clntSock, body, bodySize, 0);
+	digestBody(body, retval);
 
 	return retval;
 }

@@ -93,6 +93,15 @@ Payload* genHSHKINIT(const char *srvName) {
 	return retval;
 }
 
+Payload* genHSHKRECV(const char *clntName) {
+	Payload *retval = genHSHKINIT(clntName);
+	retval->header[4] = 'R';
+	retval->header[5] = 'E';
+	retval->header[6] = 'C';
+	retval->header[7] = 'V';
+	return retval;
+}
+
 char* genCMDHeader(CMDData *data) {
 
 	char *retval = malloc(20 * sizeof(char)); // "CMDIDENT 2147483647\0" is the longest possible header, 20 chars
