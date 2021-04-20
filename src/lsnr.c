@@ -27,19 +27,23 @@ int main(int argc, char *argv[]) {
 		printOpts(&options);
 	}
 
-	Payload *payl = genSENDMESG(69420, "This is a test of the \nemergency \nbraodcast system!");
-	printf("H:\n%s\n", payl->header);
-	printf("B:\n%s\n", payl->body);
+	LinkedList *ll = genLL();
+	int i;
+	Node *n = NULL;
+	for (i = 0; i < 5; i++) {
+		n = genNode();
+		n->data = malloc(sizeof(int));
+		*((int*)n->data) = i;
+		addNode(ll, n);
+	}
 
-	CMDData *data = digestHeader(payl->header);
-	digestBody(payl->body, data);
+	Node *curr = ll->head;
+	while (curr != NULL) {
+		printf("DATA: %d\n", *(int*)curr->data);
+		curr = curr->next;
+	}
 
-	printf("CMD: %s\n", CMDtoa(data->cmd));
-	printf("ARGC: %d\n", data->argc);
-	printf("MSG:\n%s\n", data->argv[2]);
-
-	freePayload(payl);
-	freeCMDData(data);
+	freeLL(ll);
 
 	if (options.l) {
 		NetMember *server = startServer(options.port, "Servalicious");

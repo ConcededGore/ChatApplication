@@ -3,23 +3,71 @@
 
 #include "linked_list.h"
 
-struct Node* genNode() {
-	struct Node* retval = malloc(sizeof(struct Node));
+Node* genNode() {
+	Node* retval = malloc(sizeof(Node));
 	retval->next = NULL;
 	retval->data = NULL;
 	return retval;
 }
 
-// NOTE THIS WILL NOT FREE MEMORY CORRECTLY IF DATA IS A MULTIDIMENSIONAL ARRAY (use function pointers to define how to free data)
-void freeLL(struct Node *linkedList) {
-	if (linkedList == NULL) {
-		printf("WARNING: freeLL CALLED ON NULL POINTER");
-		return;
+// Adds to the tail of the list by default
+LinkedList* addNode(LinkedList *ll, Node *n) {
+	if (ll == NULL) {
+		ll = genLL();
 	}
 
-	if (linkedList->next != NULL) {
-		freeLL(linkedList->next);
+	if (ll->tail == NULL) {
+		ll->tail = n;
+		ll->head = n;
+		ll->size = 1;
+		return ll;
 	}
-	free(linkedList->data);
-	free(linkedList);
+
+	ll->tail->next = n;
+	ll->tail = n;
+	ll->size++;
+	return ll;
+}
+
+LinkedList* addNodeFront(LinkedList *ll, Node *n) {
+	if (ll == NULL) {
+		ll = genLL();
+	}
+
+	if (ll->head == NULL) {
+		ll->head = n;
+		ll->tail = n;
+		ll->size = 1;
+		return ll;
+	}
+
+	n->next = ll->head;
+	ll->head = n;
+	ll->size++;
+	return ll;
+}
+
+LinkedList* genLL() {
+	LinkedList *retval = malloc(sizeof(LinkedList));
+
+	retval->head = NULL;
+	retval->tail = NULL;
+	retval ->size = 0;
+
+	return retval;
+}
+
+// NOTE THIS WILL NOT FREE MEMORY CORRECTLY IF DATA IS A MULTIDIMENSIONAL ARRAY (use function pointers to define how to free data)
+void freeNode(Node *n) {
+	if (n->next != NULL) {
+		freeNode(n->next);
+		n->next = NULL;
+	}
+	free(n->data);
+	free(n);
+}
+
+void freeLL(LinkedList *ll) {
+	freeNode(ll->head);
+	free(ll);
 }

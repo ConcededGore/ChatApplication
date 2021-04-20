@@ -1,12 +1,24 @@
 #ifndef LINKEDLIST
 #define LINKEDLIST
 
-struct Node {
+typedef struct Node {
 	struct Node *next;
 	void *data;
-};
+} Node;
 
-struct Node* genNode();
-void freeLL(struct Node *linkedList);
+typedef struct LinkedList {
+	Node *head;
+	Node *tail;
+	int size;
+} LinkedList;
+
+Node* genNode();
+
+LinkedList* genLL();
+LinkedList* addNode(LinkedList *ll, Node *n);
+LinkedList* addNodeFront(LinkedList *ll, Node *n);
+
+void freeNode(Node *n);
+void freeLL(LinkedList *linkedList);
 
 #endif
