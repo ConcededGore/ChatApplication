@@ -2,7 +2,7 @@
 #define SERVER
 
 #include "net_member.h"
-#include "payload_handler.h"
+#include "cmd.h"
 
 NetMember* startServer(int port, char *name);
 NetMember* listenForConnection(NetMember *server);

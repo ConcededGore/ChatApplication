@@ -10,12 +10,13 @@
 
 #include "client.h"
 #include "payload_handler.h"
+#include "cmd.h"
 
 void makeConnection(int port) {
 
 	// Create server socket
 	int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-	
+
 	// define server address
 	struct sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
@@ -27,7 +28,7 @@ void makeConnection(int port) {
 		printf("Connection Failed");
 		return;
 	}
-	
+
 	CMDData *hshkData = recvHandshake("Client", clientSocket);
 	printf("Connected to: %s at %s\n", hshkData->argv[0], hshkData->argv[1]);
 
@@ -44,7 +45,7 @@ CMDData* recvHandshake(const char *clientName, int clntSock) {
 	int bodySize = 0;
 	CMDData *retval;
 
-	recv(clntSock, header, 20, 0);	
+	recv(clntSock, header, 20, 0);
 	retval = digestHeader(header);
 	bodySize = retval->bodySize;
 	char body[bodySize];
@@ -58,6 +59,6 @@ CMDData* recvHandshake(const char *clientName, int clntSock) {
 
 	// Free pointers
 	freePayload(hshkrecv);
-	
+
 	return retval;
 }

@@ -12,6 +12,7 @@
 #include "server.h"
 #include "net_member.h"
 #include "payload_handler.h"
+#include "cmd.h"
 
 NetMember* startServer(int port, char *name) {
 	int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -57,7 +58,7 @@ NetMember* listenForConnection(struct NetMember *server) {
 	return retval;
 }
 
-CMDData* initHandshake(const char *name, int clntSock) { 
+CMDData* initHandshake(const char *name, int clntSock) {
 
 	// Sending initial handshake
 	Payload *handshakeSend = genHSHKINIT("Servalicious");

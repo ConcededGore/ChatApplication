@@ -5,56 +5,7 @@
 #include <ctype.h>
 
 #include "payload_handler.h"
-
-char* CMDtoa(CMD cmd) {
-	char *retval = malloc(9 * sizeof(char));
-	retval[0] = '\0';
-	switch(cmd) {
-		// JOINT CMD's
-		case DSCNCLNT:
-			strcpy(retval, "DSCNCLNT");
-			return retval;
-		case MUTECLNT:
-			strcpy(retval, "MUTECLNT");
-			return retval;
-		case UNMTCLNT:
-			strcpy(retval, "UNMTCLNT");
-			return retval;
-		// SYS CMD's
-		case UPDTUSRS:
-			strcpy(retval, "UPDTUSRS");
-			return retval;
-		case HSHKINIT:
-			strcpy(retval, "HSHKINIT");
-			return retval;
-		case HSHKRECV:
-			strcpy(retval, "HSHKRECV");
-			return retval;
-		default:
-			printf("ERROR: CMDtoa IS DEFAULTING FROM cmd = %d\n", cmd); // THIS IS FOR IF I ADD NEW CMD's AND FORGET TO UPDATE THIS FUNC
-			return NULL;
-	}
-}
-
-CMD atoCMD(char *str) {
-
-	if (!strcmp(str, "DSCNCLNT")) {
-		return DSCNCLNT;
-	} else if (!strcmp(str, "MUTECLNT")) {
-		return MUTECLNT;
-	} else if (!strcmp(str, "UNMTCLNT")) {
-		return UNMTCLNT;
-	} else if (!strcmp(str, "UPDTUSRS")) {
-		return UPDTUSRS;
-	} else if (!strcmp(str, "HSHKINIT")) {
-		return HSHKINIT;
-	} else if (!strcmp(str, "HSHKRECV")) {
-		return HSHKRECV;
-	}
-
-	printf("atoCMD is defaulting with str: %s\nReturning 0 (BADCMD)", str);
-	return BADCMD;
-}
+#include "cmd.h"
 
 int getCMDBodySize(CMDData *data) {
 	int retval = 0;
@@ -72,7 +23,7 @@ Payload* genHSHKINIT(const char *srvName) {
 	Payload *retval = malloc(sizeof(Payload));
 	CMDData data;
 
-	char **argv = malloc(sizeof(char*));
+	char **argv = malloc(2 * sizeof(char*));
 	argv[0] = malloc((strlen(srvName) + 1) * sizeof(char));
 	argv[0][0] = '\0';
 	strcpy(argv[0], srvName);
@@ -90,6 +41,8 @@ Payload* genHSHKINIT(const char *srvName) {
 	retval->body = genCMDBody(&data);
 	retval->bodySize = data.bodySize;
 
+	free(argv[0]);
+	free(argv);
 	return retval;
 }
 
@@ -99,6 +52,124 @@ Payload* genHSHKRECV(const char *clntName) {
 	retval->header[5] = 'E';
 	retval->header[6] = 'C';
 	retval->header[7] = 'V';
+	return retval;
+}
+
+Payload* genMUTECLNT(int userid, int targetid) {
+	Payload *retval = malloc(sizeof(Payload));
+	CMDData data;
+	int argc = 2;
+	char **argv = malloc(argc * sizeof(char*));
+
+	data.argc = argc;
+	char buffer[11];
+	buffer[10] = '\0';
+	int i;
+	for (i = 0; i < 10; i++) {
+		buffer[i] = '0';
+	}
+
+	sprintf(buffer, "%d", userid);
+	argv[0] = malloc((strlen(buffer) + 1) * sizeof(char));
+	strcpy(argv[0], buffer);
+
+	sprintf(buffer, "%d", targetid);
+	argv[1] = malloc((strlen(buffer) + 1) * sizeof(char));
+	strcpy(argv[1], buffer);
+
+	data.argv = argv;
+	data.bodySize = getCMDBodySize(&data);
+	data.cmd = MUTECLNT;
+
+	retval->header = genCMDHeader(&data);
+	retval->body = genCMDBody(&data);
+	retval->bodySize = data.bodySize;
+
+	free(argv[0]);
+	free(argv[1]);
+	free(argv);
+	return retval;
+}
+
+Payload* genUNMTCLNT(int userid, int targetid) {
+	Payload *retval = genMUTECLNT(userid, targetid);
+	retval->header[0] = 'U';
+	retval->header[1] = 'N';
+	retval->header[2] = 'M';
+	retval->header[3] = 'T';
+
+	return retval;
+}
+
+Payload* genDSCNCLNT(int userid) {
+	Payload *retval = malloc(sizeof(Payload));
+	CMDData data;
+	int argc = 1;
+	char **argv = malloc(argc * sizeof(char*));
+
+	data.argc = argc;
+
+	char buffer[11];
+	buffer[10] = '\0';
+	int i;
+	for(i = 0; i < 10; i++) {
+		buffer[i] = '0';
+	}
+
+	sprintf(buffer, "%d", userid);
+	argv[0] = malloc((strlen(buffer) + 1) * sizeof(char));
+	strcpy(argv[0], buffer);
+
+	data.cmd = DSCNCLNT;
+	data.argv = argv;
+	data.bodySize = getCMDBodySize(&data);
+
+	retval->header = genCMDHeader(&data);
+	retval->body = genCMDBody(&data);
+	retval->bodySize = data.bodySize;
+
+	free(argv[0]);
+	free(argv);
+
+	return retval;
+}
+
+Payload* genSENDMESG(int userid, char *MSG) {
+	Payload *retval = malloc(sizeof(Payload));
+	CMDData data;
+	int argc = 3;
+	char **argv = malloc(argc * sizeof(char*));
+
+	data.argc = argc;
+	argv[0] = getTimestamp();
+
+	char buffer[11];
+	buffer[10] = '\0';
+	int i;
+	for (i = 0; i < 10; i++) {
+		buffer[i] = '0';
+	}
+
+	sprintf(buffer, "%d", userid);
+	argv[1] = malloc((strlen(buffer) + 1) * sizeof(char));
+	strcpy(argv[1], buffer);
+
+	argv[2] = malloc((strlen(MSG) + 1) * sizeof(char));
+	strcpy(argv[2], MSG);
+
+	data.cmd = SENDMESG;
+	data.argv = argv;
+	data.bodySize = getCMDBodySize(&data);
+
+	retval->header = genCMDHeader(&data);
+	retval->body = genCMDBody(&data);
+	retval->bodySize = data.bodySize;
+
+	free(argv[0]);
+	free(argv[1]);
+	free(argv[2]);
+	free(argv);
+
 	return retval;
 }
 
@@ -122,12 +193,12 @@ CMDData* digestHeader(char *str) {
 	cmdStr[8] = '\0';
 
 	char curr = ptr[0];
-	
+
 	int count = 0;
 	int digFlag = 0;
 
 	CMD cmd;
-	
+
 	CMDData *retval = malloc(sizeof(CMDData));
 
 	while (curr != '\0') {
@@ -189,54 +260,38 @@ CMDData* digestBody(char *str, CMDData *header) {
 	char curr = argStart[0];
 
 	int argCount = 0;
+	int msgFlag = (header->cmd == SENDMESG);
+	while(curr != '\0') {
+		if (curr == '\n') { // Should probably write a func to validate that number of \n's is as expected by argc
 
-	switch(header->cmd) {
-		case SENDMESG: // THIS IS BECAUSE SEND MESSEGE MAY HAVE NEWLINES IN THE MSG BODY, AND MUST BE TREATED DIFFERENTLY
-			printf("SENDMSG is currently unimplemented!!!\n");
-			break;
-		default:
-			while(curr != '\0') {
-				if (curr == '\n') { // Should probably write a func to validate that number of \n's is as expected by argc
-					ptr[0] = '\0';
-
-					ptr++;
-					curr = ptr[0];
-					if (curr == '\0') { // Since there is always a trailing '\n'
-						break;
-					}
-
-					header->argv[argCount] = malloc((strlen(argStart) + 1) * sizeof(char));
-					strcpy(header->argv[argCount], argStart);
-					
-					argCount++;
-					argStart = ptr;
-
-					continue;
-				}
-				ptr++;
-				curr = ptr[0];
+			// This feels very hacky but it should allow '\n' chars in MSG's if I desire them to be there
+			if (msgFlag && argCount == 2) {
+				header->argv[argCount] = malloc((strlen(argStart) + 1) * sizeof(char));
+				strcpy(header->argv[argCount], argStart);
+				break;
 			}
+
+			ptr[0] = '\0';
+			ptr++;
+			curr = ptr[0];
+			if (curr == '\0') { // Since there is always a trailing '\n'
+				break;
+			}
+
+			header->argv[argCount] = malloc((strlen(argStart) + 1) * sizeof(char));
+			strcpy(header->argv[argCount], argStart);
+
+			argCount++;
+			argStart = ptr;
+
+			continue;
+		}
+		ptr++;
+		curr = ptr[0];
 	}
 
 	return header;
 
-}
-
-int getNumArgs(CMD cmd) {
-	switch(cmd) {
-		case HSHKINIT:
-		case HSHKRECV:
-		case SENDMESG:
-		case MUTECLNT:
-		case UNMTCLNT:
-			return 2;
-		case DSCNCLNT:
-		case UPDTUSRS:
-			return 1;
-		default:
-			printf("getNumArgs is defaulting with CMD: %d\n", cmd);
-			return 0;
-	}
 }
 
 // BE CAREFUL THAT FOR MSG's THE ACTUAL TEXT IS THE VERY LAST ARG SO IT MAY CONTAIN \n WITHOUT ISSUE (or escape chars cuz I'm lazy)
@@ -250,7 +305,7 @@ char* genCMDBody(CMDData *data) {
 	char *retval = malloc(bodySize * sizeof(char));
 	retval[0] = '\0';
 	int i;
-	
+
 	for (i = 0; i < data->argc; i++) {
 		strcat(retval, data->argv[i]);
 		strcat(retval, "\n");
@@ -265,28 +320,7 @@ char* genCMDBody(CMDData *data) {
 	return retval;
 }
 
-// ADD FUNC'S TO AUTOGEN ARGC AND ARGV (this would also allow the data to be freed automatically!!!)
-CMDData* genCMDData(CMD cmd, int argc, char **argv) {
-
-	CMDData *retval = malloc(sizeof(CMDData));
-
-	retval->cmd = cmd;
-	retval->argc = argc;
-	retval->argv = argv;
-	retval->bodySize = getCMDBodySize(retval);
-
-	return retval;
-}
-
 // HELPER FUNCTIONS
-
-void freeCMDData(CMDData *data) {
-	int i;
-	for (i = 0; i < data->argc; i++) {
-		free(data->argv[i]);
-	}
-	free(data);
-}
 
 void freePayload(Payload *payload) {
 	free(payload->header);
@@ -303,6 +337,10 @@ char* getTimestamp() {
 	tmPtr = localtime(&lt);
 	retval = malloc(strlen(asctime(tmPtr)));
 	strcpy(retval, asctime(tmPtr));
+
+	if (retval[strlen(retval) - 1] == '\n') {
+		retval[strlen(retval) - 1] = '\0';
+	}
 
 	return retval;
 }

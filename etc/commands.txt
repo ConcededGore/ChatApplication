@@ -6,7 +6,8 @@ User CMD's - Only used by the end user
   - SENDMESG; default when no ! character is found at the beginning of the entered text
     -> quite literally meant to send plain text
       (arg0: timestamp)
-      (arg1: MSG)
+      (arg1: userid) # sender userid
+      (arg2: MSG)
 
 Joint CMD's - Require action from user and server
   - exit - DSCNCLNT; disconnects a client from the server gracefully

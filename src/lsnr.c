@@ -15,6 +15,7 @@
 #include "linked_list.h"
 #include "net_member.h"
 #include "payload_handler.h"
+#include "cmd.h"
 
 int main(int argc, char *argv[]) {
 
@@ -22,7 +23,23 @@ int main(int argc, char *argv[]) {
 
 	initOpts(&options);
 	parseOpts(argc, argv, &options);
-	printOpts(&options);
+	if (options.v) {
+		printOpts(&options);
+	}
+
+	Payload *payl = genSENDMESG(69420, "This is a test of the \nemergency \nbraodcast system!");
+	printf("H:\n%s\n", payl->header);
+	printf("B:\n%s\n", payl->body);
+
+	CMDData *data = digestHeader(payl->header);
+	digestBody(payl->body, data);
+
+	printf("CMD: %s\n", CMDtoa(data->cmd));
+	printf("ARGC: %d\n", data->argc);
+	printf("MSG:\n%s\n", data->argv[2]);
+
+	freePayload(payl);
+	freeCMDData(data);
 
 	if (options.l) {
 		NetMember *server = startServer(options.port, "Servalicious");
