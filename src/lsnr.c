@@ -27,24 +27,6 @@ int main(int argc, char *argv[]) {
 		printOpts(&options);
 	}
 
-	LinkedList *ll = genLL();
-	int i;
-	Node *n = NULL;
-	for (i = 0; i < 5; i++) {
-		n = genNode();
-		n->data = malloc(sizeof(int));
-		*((int*)n->data) = i;
-		addNode(ll, n);
-	}
-
-	Node *curr = ll->head;
-	while (curr != NULL) {
-		printf("DATA: %d\n", *(int*)curr->data);
-		curr = curr->next;
-	}
-
-	freeLL(ll);
-
 	if (options.l) {
 		NetMember *server = startServer(options.port, "Servalicious");
 		NetMember *client = listenForConnection(server);

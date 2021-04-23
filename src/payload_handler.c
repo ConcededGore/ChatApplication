@@ -274,9 +274,6 @@ CMDData* digestBody(char *str, CMDData *header) {
 			ptr[0] = '\0';
 			ptr++;
 			curr = ptr[0];
-			if (curr == '\0') { // Since there is always a trailing '\n'
-				break;
-			}
 
 			header->argv[argCount] = malloc((strlen(argStart) + 1) * sizeof(char));
 			strcpy(header->argv[argCount], argStart);
